@@ -36,5 +36,3 @@ async def check_favorites():
 
 bot.loop.create_task(check_favorites())
 bot.run('OTA1MzIzMTQ0MTI5MTU1MDky.YYIZ4Q.JBwCE-HSWPW-BMbOuXfvRdNHf4c')
-    
-    #print ('{} - {}'.format(chicken[0].id,chicken[0].text))
