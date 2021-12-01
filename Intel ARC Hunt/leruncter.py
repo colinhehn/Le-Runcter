@@ -1,6 +1,6 @@
-import discord
 from discord.ext import tasks, commands
 import tweepy
+
 
 # Le Runcter is a Twitter bot for reading specified accounts LIKED and POSTED tweets (including replies), and then posting them to a specified Discord channel.
 # Originally designed for Intel's ARC Xe Scavenger Hunt.
@@ -19,41 +19,73 @@ user_list = ['IntelGraphics', 'PGelSinger', 'RajaOnTheEdge', 'gfxLisa',
              'RogerDChandler', 'BobDuffy', 'CaptGeek', 'theBryceIsRt', 'XboxGamePassPC']
 
 
+# Function for retrieving and parsing the ID stored in last_seen_id.txt.
 def retrieve_last_seen_id(file_name):
     f_read = open(file_name, 'r')
     last_seen_id = int(f_read.read().strip())
     f_read.close()
+    print(f"Found last_seen_id! Value: {last_seen_id}")
+    
     return last_seen_id
 
+
+# Function for replacing the ID in last_seen_id.txt with a new one.
 def store_last_seen_id(last_seen_id, file_name):
     f_write = open(file_name, 'w')
     f_write.write(str(last_seen_id))
     f_write.close()
+    print(f"Wrote new last_seen_id! Value: {last_seen_id}")
+    
     return
 
 
 # Maintenance Variables
 client = commands.Bot(command_prefix='!')
 
-# Bot Functionality - Checks Twitter for Likes every 5 Minutes, Posts to Discord
-@tasks.loop(seconds=5.0)
+
+# Notification for when bot is live
+@client.event
+async def on_ready():
+    print('Bot is logged in as {0.user} and running!'.format(client))
+
+
+# Bot Functionality - Checks Twitter for Likes every 5 Minutes, Posts to Discord.
+@tasks.loop(minutes=5.0)
 async def check_favorites():
     
     await client.wait_until_ready()
     
-    last_seen_id = retrieve_last_seen_id('last_seen_id.txt')
+    # Bot is bricking at this point. Must be an issue with client.wait_until_ready() or retrieve_last_seen_id().
+    # Do some research!
     
-    channel = client.get_channel(913332196285222973)
-
+    last_seen_id = retrieve_last_seen_id('last_seen_id.txt')
+    print("last_seen_id retrieved.")
+    
+    channel = client.get_channel(914646418927538207)
+    print("Discord channel retrieved.")
+    
+    id_list = []
     for user in user_list:
+        
         favorites = api.get_favorites(screen_name=user, since_id=last_seen_id)
+        print(f"List of favorites retrieved for {user}! Length: {len(favorites)}.")
+        
         if len(favorites) >= 1:
-            print("CHECKING!!!!")
+            print(f"Favorites detected for {user}!")
+            
             for favorite in favorites:
-                if favorite.id > int(last_seen_id):
-                    store_last_seen_id(favorite.id, 'last_seen_id.txt')
-                    await channel.send(f'{favorite.user.screen_name} at {favorite.created_at} - {favorite.text}')
-        else: print("No Favorites to Show!")
+                    await channel.send(f'{favorite.user.screen_name} at {favorite.created_at[0:9]} - {favorite.text}')
+                    print(f"Discord Message sent for {favorite.id}!")
+                    
+                    id_list.append(int(favorite.id))
+                    
+        else: print(f"No new favorites to show for {user}!")
+        
+    store_last_seen_id(max(id_list), 'last_seen_id.txt')
+    print("New last_seen_id written to file.")
 
+
+# Starting up the bot!
 check_favorites.start()
+print('Check favorites task started!')
 client.run('OTA1MzIzMTQ0MTI5MTU1MDky.YYIZ4Q.Jp4WVmlZXIyhK25drK6Gflq8tcU')
