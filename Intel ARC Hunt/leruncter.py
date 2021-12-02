@@ -24,7 +24,7 @@ def retrieve_last_seen_id(file_name):
     f_read = open(file_name, 'r')
     last_seen_id = int(f_read.read().strip())
     f_read.close()
-    print(f"Found last_seen_id! Value: {last_seen_id}")
+    print(f'Found last_seen_id! Value: {last_seen_id}')
     
     return last_seen_id
 
@@ -34,7 +34,7 @@ def store_last_seen_id(last_seen_id, file_name):
     f_write = open(file_name, 'w')
     f_write.write(str(last_seen_id))
     f_write.close()
-    print(f"Wrote new last_seen_id! Value: {last_seen_id}")
+    print(f'Wrote new last_seen_id! Value: {last_seen_id}')
     
     return
 
@@ -59,30 +59,39 @@ async def check_favorites():
     # Do some research!
     
     last_seen_id = retrieve_last_seen_id('last_seen_id.txt')
-    print("last_seen_id retrieved.")
+    print('last_seen_id retrieved.')
     
     channel = client.get_channel(914646418927538207)
-    print("Discord channel retrieved.")
+    print('Discord channel retrieved.')
     
     id_list = []
+    favorite_list = []
+    
     for user in user_list:
         
         favorites = api.get_favorites(screen_name=user, since_id=last_seen_id)
-        print(f"List of favorites retrieved for {user}! Length: {len(favorites)}.")
+        print(f'List of favorites retrieved for {user}! Length: {len(favorites)}.')
         
         if len(favorites) >= 1:
-            print(f"Favorites detected for {user}!")
+            print(f'Favorites detected for {user}!')
             
-            for favorite in favorites:
-                    await channel.send(f'{favorite.user.screen_name} at {favorite.created_at[0:9]} - {favorite.text}')
-                    print(f"Discord Message sent for {favorite.id}!")
-                    
+            for favorite in reversed(favorites):
+                    favorite_list.append(favorite)
                     id_list.append(int(favorite.id))
+                    print(f'Favorite appended for {user}, ID appended: {favorite.id}')
                     
-        else: print(f"No new favorites to show for {user}!")
+        else: print(f'No new favorites to show for {user}!')
+    
+    if len(favorite_list) >= 1:
+        # sort favorite_list by favorite.created_at
+        
+        for favorite in favorite_list:
+            await channel.send(f'{favorite.user.screen_name} at {favorite.created_at[0:9]} - {favorite.text}')
+            print(f'Discord Message sent for {favorite.id}!')
+    else: print('NO NEW FAVORITES FOR ALL USERS!')
         
     store_last_seen_id(max(id_list), 'last_seen_id.txt')
-    print("New last_seen_id written to file.")
+    print('New last_seen_id written to file.')
 
 
 # Starting up the bot!
