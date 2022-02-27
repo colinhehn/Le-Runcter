@@ -7,10 +7,10 @@ import tweepy
 
 
 # Twitter Auth Setup
-auth = tweepy.OAuthHandler('S3UPGbuTjiKtjxNWM8VgWh2pU',
-                           'clSlTmL5z4J0LbdlqLy5r3sBXUYWj8W6JUOSsq9cV5vDj0dmlf')
-auth.set_access_token('831257102756757504-7EGUjdR3BT6l3r4AaLpeUz96Zw2TkoY',
-                      'ILITaeHHQyLQdw6f9QyyuI97eIQKZdvNszW1qa10j3uP5')
+auth = tweepy.OAuthHandler('REDACTED',
+                           'REDACTED')
+auth.set_access_token('REDACTED',
+                      'REDACTED')
 api = tweepy.API(auth)
 
 
@@ -61,7 +61,7 @@ async def check_favorites():
     last_seen_id = retrieve_last_seen_id('last_seen_id.txt')
     print('last_seen_id retrieved.')
     
-    channel = client.get_channel(914646418927538207)
+    channel = client.get_channel(REDACTED)
     print('Discord channel retrieved.')
     
     id_list = []
@@ -97,4 +97,4 @@ async def check_favorites():
 # Starting up the bot!
 check_favorites.start()
 print('Check favorites task started!')
-client.run('OTA1MzIzMTQ0MTI5MTU1MDky.YYIZ4Q.Jp4WVmlZXIyhK25drK6Gflq8tcU')
+client.run('REDACTED')
